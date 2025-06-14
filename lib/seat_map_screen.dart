@@ -1,35 +1,73 @@
 import 'package:flutter/cupertino.dart';
+import 'shared_data.dart';
+import 'shared_seat_data.dart';
 
-class SeatMapScreen extends StatelessWidget {
+class SeatMapScreen extends StatefulWidget {
   final List<SeatData> seats;
 
   const SeatMapScreen({super.key, required this.seats});
 
   @override
+  State<SeatMapScreen> createState() => _SeatMapScreenState();
+}
+
+class _SeatMapScreenState extends State<SeatMapScreen> {
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
+
+  @override
   Widget build(BuildContext context) {
+    // Filtered seat list based on search
+    List<SeatData> filteredSeats = widget.seats.where((seat) {
+      return seat.studentName.toLowerCase().contains(searchQuery.toLowerCase());
+    }).toList();
+
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: Text('Seating Plan'),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              const SizedBox(height: 20),
+
+              // Page Header
+              const Text(
+                'Classroom Seating Plan',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Search Bar
+              CupertinoSearchTextField(
+                controller: searchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
+                placeholder: 'Search student name',
+              ),
+
+              const SizedBox(height: 16),
 
               // Seat Grid
               Expanded(
                 child: GridView.builder(
-                  itemCount: seats.length,
+                  itemCount: filteredSeats.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // Adjust number of columns as needed
+                    crossAxisCount: 4, // 4 columns
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
                     childAspectRatio: 0.9,
                   ),
                   itemBuilder: (context, index) {
-                    final seat = seats[index];
+                    final seat = filteredSeats[index];
                     return SeatCard(
                       studentName: seat.studentName,
                       isPresent: seat.isPresent,
@@ -102,9 +140,3 @@ class SeatCard extends StatelessWidget {
   }
 }
 
-class SeatData {
-  final String studentName;
-  bool isPresent;
-
-  SeatData({required this.studentName, required this.isPresent});
-}

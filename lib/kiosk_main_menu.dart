@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'seat_map_screen.dart';
+import 'shared_data.dart';
+import 'shared_seat_data.dart';
 
 class KioskMainMenu extends StatefulWidget {
   final String studentName;
