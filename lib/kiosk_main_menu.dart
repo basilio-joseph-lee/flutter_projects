@@ -13,7 +13,6 @@ class KioskMainMenu extends StatefulWidget {
 }
 
 class _KioskMainMenuState extends State<KioskMainMenu> {
-  // Example seat data → in real app this will come from database
   List<SeatData> seats = [
     SeatData(studentName: 'John Doe', isPresent: false),
     SeatData(studentName: 'Jane Smith', isPresent: true),
@@ -25,139 +24,153 @@ class _KioskMainMenuState extends State<KioskMainMenu> {
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: CupertinoNavigationBar(
-        middle: Text('Welcome, ${widget.studentName}'),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          child: const Icon(CupertinoIcons.power),
-          onPressed: () {
-            Navigator.pop(context); // Go back to login screen (Logout)
-          },
-        ),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
+      backgroundColor: CupertinoColors.systemGroupedBackground,
+      child: Stack(
+        children: [
+          // Corkboard background
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/corkboard.png',
+              fit: BoxFit.cover,
+            ),
+          ),
 
-              const SizedBox(height: 20),
-
-              // Example: Small Seat Map Preview (placeholder now)
-              Container(
-                height: 150,
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Seat Map Preview',
-                    style: TextStyle(fontSize: 16, color: CupertinoColors.systemGrey),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Action Buttons Grid
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
+          // Custom navigation bar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: kioskActionCard(
-                        icon: CupertinoIcons.checkmark_seal_fill,
-                        label: 'Mark Attendance',
-                        color: CupertinoColors.activeGreen,
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Text(
+                        'Welcome, ${widget.studentName}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoColors.white,
+                          shadows: [
+                            Shadow(
+                              color: CupertinoColors.black,
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
                       ),
-                      onPressed: () {
-                        markAttendance();
-                      },
                     ),
-
                     CupertinoButton(
                       padding: EdgeInsets.zero,
-                      child: kioskActionCard(
-                        icon: CupertinoIcons.person_crop_rectangle,
-                        label: 'Go to Restroom',
-                        color: CupertinoColors.systemYellow,
+                      child: const Icon(
+                        CupertinoIcons.power,
+                        color: CupertinoColors.white,
+                        size: 24,
                       ),
-                      onPressed: () {
-                        // TODO: Handle Restroom action
-                      },
-                    ),
-
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: kioskActionCard(
-                        icon: CupertinoIcons.cart_fill,
-                        label: 'Buy Snack',
-                        color: CupertinoColors.systemOrange,
-                      ),
-                      onPressed: () {
-                        // TODO: Handle Snack action
-                      },
-                    ),
-
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: kioskActionCard(
-                        icon: CupertinoIcons.time,
-                        label: 'Take a Break',
-                        color: CupertinoColors.systemPurple,
-                      ),
-                      onPressed: () {
-                        // TODO: Handle Break action
-                      },
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
               ),
+            ),
+          ),
 
-              const SizedBox(height: 20),
-
-              // View Seat Map button
-              CupertinoButton.filled(
-                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-                child: const Text('View Seat Map'),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => SeatMapScreen(
-                        seats: seats,
+          // Foreground content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 70, left: 20, right: 20, bottom: 10),
+              child: Column(
+                children: [
+                  Container(
+                    height: 150,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: CupertinoColors.systemGrey),
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'Seat Map Preview',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: CupertinoColors.systemGrey,
+                        ),
                       ),
                     ),
-                  );
-                },
+                  ),
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      children: [
+                        _buildActionCard(
+                          icon: CupertinoIcons.checkmark_seal_fill,
+                          label: 'Mark Attendance',
+                          color: const Color(0xFFCAF7E3), // Light green
+                          onTap: markAttendance,
+                        ),
+                        _buildActionCard(
+                          icon: CupertinoIcons.person_crop_rectangle,
+                          label: 'Go to Restroom',
+                          color: const Color(0xFFFFF3B0), // Light yellow
+                          onTap: () {},
+                        ),
+                        _buildActionCard(
+                          icon: CupertinoIcons.cart_fill,
+                          label: 'Buy Snack',
+                          color: const Color(0xFFFFE8D6), // Light orange
+                          onTap: () {},
+                        ),
+                        _buildActionCard(
+                          icon: CupertinoIcons.time,
+                          label: 'Take a Break',
+                          color: const Color(0xFFE4C1F9), // Light purple
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildWideButton(
+                    label: 'View Seat Map',
+                    color1: const Color(0xFFD1E8FF),
+                    color2: const Color(0xFFB5D5F3),
+                    textColor: CupertinoColors.black,
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                          builder: (context) => SeatMapScreen(seats: seats),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  _buildWideButton(
+                    label: 'Logout',
+                    color1: const Color(0xFFFFC1C1),
+                    color2: const Color(0xFFFF8888),
+                    textColor: CupertinoColors.black,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-
-              const SizedBox(height: 20),
-
-              // Logout button
-              CupertinoButton.filled(
-                padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 16),
-                child: const Text('Logout'),
-                onPressed: () {
-                  Navigator.pop(context); // Return to login screen
-                },
-              ),
-
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // Function to mark attendance
   void markAttendance() {
     setState(() {
       for (var seat in seats) {
@@ -168,37 +181,88 @@ class _KioskMainMenuState extends State<KioskMainMenu> {
     });
   }
 
-  // Reusable Card for Actions
-  Widget kioskActionCard({required IconData icon, required String label, required Color color}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: CupertinoColors.white, size: 50),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: const TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+  Widget _buildActionCard({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.5),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
             ),
           ],
         ),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: CupertinoColors.black, size: 48),
+              const SizedBox(height: 10),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: CupertinoColors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWideButton({
+    required String label,
+    required Color color1,
+    required Color color2,
+    required Color textColor,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [color1, color2],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: color2.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: CupertinoButton(
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        borderRadius: BorderRadius.circular(16),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: textColor,
+          ),
+        ),
+        onPressed: onPressed,
       ),
     );
   }

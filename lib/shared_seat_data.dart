@@ -17,7 +17,7 @@ class SharedSeatData {
     SeatData(studentName: 'Lisa', isPresent: false),
     SeatData(studentName: 'Chris', isPresent: true),
     SeatData(studentName: 'Michael', isPresent: true),
-    SeatData(studentName: 'Emma', isPresent: false),
+    SeatData(studentName: 'Emma', isPresent: true),
     SeatData(studentName: 'Sophia', isPresent: true),
     SeatData(studentName: 'Oliver', isPresent: true),
     SeatData(studentName: 'James', isPresent: false),

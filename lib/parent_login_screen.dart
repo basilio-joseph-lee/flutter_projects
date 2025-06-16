@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'parent_dashboard_screen.dart';
 
 class ParentLoginScreen extends StatefulWidget {
@@ -14,42 +15,130 @@ class _ParentLoginScreenState extends State<ParentLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Parent Login'),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(32.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CupertinoTextField(
-                controller: emailController,
-                placeholder: 'Email / Username',
+      child: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/classroom_bg.png'),
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 20),
-              CupertinoTextField(
-                controller: passwordController,
-                placeholder: 'Password',
-                obscureText: true,
-              ),
-              const SizedBox(height: 30),
-              CupertinoButton.filled(
-                child: const Text('Login'),
-                onPressed: () {
-                  // Simulate successful login → navigate to ParentDashboardScreen
-                  Navigator.push(
-                    context,
-                    CupertinoPageRoute(
-                      builder: (context) => const ParentDashboardScreen(),
-                    ),
-                  );
-                },
-              ),
-            ],
+            ),
           ),
-        ),
+
+          Positioned(
+            top: 30,
+            left: 20,
+            child: CupertinoButton(
+              padding: const EdgeInsets.all(4),
+              minSize: 0,
+              child: const Icon(
+                CupertinoIcons.back,
+                color: Color(0xFF6B3E26),
+                size: 28,
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+          ),
+
+          SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: const EdgeInsets.only(top: 130),
+                padding: const EdgeInsets.all(20),
+                width: screenWidth * 0.75,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Welcome, Parent!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(1, 1),
+                            blurRadius: 2,
+                            color: Colors.black45,
+                          )
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Icon(
+                      CupertinoIcons.person_2_fill,
+                      color: Colors.white70,
+                      size: 60,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildChalkTextField(
+                      emailController,
+                      'Email / Username',
+                      icon: CupertinoIcons.mail_solid,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildChalkTextField(
+                      passwordController,
+                      'Password',
+                      icon: CupertinoIcons.lock_fill,
+                      obscure: true,
+                    ),
+                    const SizedBox(height: 15),
+                    CupertinoButton(
+                      color: Colors.amberAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 14),
+                      borderRadius: BorderRadius.circular(30),
+                      child: const Text(
+                        'Login',
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (context) => const ParentDashboardScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChalkTextField(
+      TextEditingController controller,
+      String placeholder, {
+        IconData? icon,
+        bool obscure = false,
+      }) {
+    return CupertinoTextField(
+      controller: controller,
+      placeholder: placeholder,
+      obscureText: obscure,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      prefix: icon != null
+          ? Padding(
+        padding: const EdgeInsets.only(left: 8),
+        child: Icon(icon, color: Color(0xFF2F7E4F)),
+      )
+          : null,
+      style: const TextStyle(fontSize: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
       ),
     );
   }

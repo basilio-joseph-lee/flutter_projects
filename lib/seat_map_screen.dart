@@ -17,67 +17,124 @@ class _SeatMapScreenState extends State<SeatMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Filtered seat list based on search
     List<SeatData> filteredSeats = widget.seats.where((seat) {
       return seat.studentName.toLowerCase().contains(searchQuery.toLowerCase());
     }).toList();
 
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Seating Plan'),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-
-              // Page Header
-              const Text(
-                'Classroom Seating Plan',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Search Bar
-              CupertinoSearchTextField(
-                controller: searchController,
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value;
-                  });
-                },
-                placeholder: 'Search student name',
-              ),
-
-              const SizedBox(height: 16),
-
-              // Seat Grid
-              Expanded(
-                child: GridView.builder(
-                  itemCount: filteredSeats.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4, // 4 columns
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
-                    childAspectRatio: 0.9,
-                  ),
-                  itemBuilder: (context, index) {
-                    final seat = filteredSeats[index];
-                    return SeatCard(
-                      studentName: seat.studentName,
-                      isPresent: seat.isPresent,
-                    );
-                  },
-                ),
-              ),
-            ],
+      child: Stack(
+        children: [
+          // Corkboard background
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/corkboard.png',
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
+
+          // Custom navigation bar
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: SizedBox(
+                height: 60,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Back button
+                    Positioned(
+                      left: 16,
+                      child: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: const Icon(
+                          CupertinoIcons.chevron_left,
+                          color: CupertinoColors.white,
+                          size: 28,
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                    // Centered title
+                    const Text(
+                      'Seating Plan',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: CupertinoColors.white,
+                        shadows: [
+                          Shadow(
+                            color: CupertinoColors.black,
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Foreground content
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 70, left: 16, right: 16),
+              child: Column(
+                children: [
+                  // Search Bar
+                  Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CupertinoColors.black.withOpacity(0.1),
+                          blurRadius: 6,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: CupertinoSearchTextField(
+                      controller: searchController,
+                      onChanged: (value) {
+                        setState(() {
+                          searchQuery = value;
+                        });
+                      },
+                      placeholder: 'Search student name',
+                      backgroundColor: CupertinoColors.white.withOpacity(0.8),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Seat Grid
+                  Expanded(
+                    child: GridView.builder(
+                      itemCount: filteredSeats.length,
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 4,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                        childAspectRatio: 0.9,
+                      ),
+                      itemBuilder: (context, index) {
+                        final seat = filteredSeats[index];
+                        return SeatCard(
+                          studentName: seat.studentName,
+                          isPresent: seat.isPresent,
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -95,9 +152,13 @@ class SeatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Color cardColor = isPresent
+        ? const Color(0xFFCAF7E3) // Light green
+        : const Color(0xFFFFE5E5); // Light pink
+
     return Container(
       decoration: BoxDecoration(
-        color: isPresent ? CupertinoColors.activeGreen : CupertinoColors.systemGrey4,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -110,24 +171,20 @@ class SeatCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Avatar Icon
           Icon(
             isPresent
                 ? CupertinoIcons.person_crop_circle_fill
                 : CupertinoIcons.person_crop_circle_badge_xmark,
             size: 50,
-            color: CupertinoColors.white,
+            color: CupertinoColors.black,
           ),
-
           const SizedBox(height: 12),
-
-          // Name Label
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
               studentName,
               style: const TextStyle(
-                color: CupertinoColors.white,
+                color: CupertinoColors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),
@@ -139,4 +196,3 @@ class SeatCard extends StatelessWidget {
     );
   }
 }
-

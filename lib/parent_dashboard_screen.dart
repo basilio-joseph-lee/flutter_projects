@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'seat_map_screen.dart';
 import 'shared_data.dart';
 import 'shared_seat_data.dart';
@@ -13,9 +14,10 @@ class ParentDashboardScreen extends StatefulWidget {
 
 class _ParentDashboardScreenState extends State<ParentDashboardScreen> {
   int selectedIndex = 0;
-  final CupertinoTabController tabController = CupertinoTabController(); // Add this
+  final CupertinoTabController tabController = CupertinoTabController();
 
-  // Example child seat data
+  bool _notificationsEnabled = true;
+
   SeatData childSeat = SharedSeatData().seats.firstWhere(
         (seat) => seat.studentName == 'John Doe',
     orElse: () => SeatData(studentName: 'Unknown', isPresent: false),
@@ -24,7 +26,7 @@ class _ParentDashboardScreenState extends State<ParentDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return CupertinoTabScaffold(
-      controller: tabController, // Add this
+      controller: tabController,
       tabBar: CupertinoTabBar(
         currentIndex: selectedIndex,
         onTap: (index) {
@@ -70,342 +72,462 @@ class _ParentDashboardScreenState extends State<ParentDashboardScreen> {
 
   Widget buildDashboardTab() {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Parent Dashboard'),
-      ),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 16),
-
-              // Child Status
-              Container(
-                decoration: BoxDecoration(
-                  color: CupertinoColors.systemGrey6,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: CupertinoColors.black.withOpacity(0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                child: Row(
-                  children: [
-                    Icon(
-                      childSeat.isPresent
-                          ? CupertinoIcons.check_mark_circled_solid
-                          : CupertinoIcons.clear_circled_solid,
-                      color: childSeat.isPresent
-                          ? CupertinoColors.activeGreen
-                          : CupertinoColors.systemRed,
-                      size: 36,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        '${childSeat.studentName} is currently ${childSeat.isPresent ? "Present" : "Absent / On Break"}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Dashboard Grid
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  children: [
-                    // View Attendance History
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: dashboardCard(
-                        icon: CupertinoIcons.time,
-                        label: 'Attendance History',
-                        color: CupertinoColors.systemIndigo,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => ParentChildAttendanceHistoryScreen(
-                              childName: childSeat.studentName,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // View Full Seat Map
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: dashboardCard(
-                        icon: CupertinoIcons.person_3_fill,
-                        label: 'View Seat Map',
-                        color: CupertinoColors.activeGreen,
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (context) => SeatMapScreen(
-                              seats: SharedSeatData().seats,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    // View Grades
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: dashboardCard(
-                        icon: CupertinoIcons.chart_bar_alt_fill,
-                        label: 'Grades',
-                        color: CupertinoColors.systemOrange,
-                      ),
-                      onPressed: () {
-                        tabController.index = 2; // Correct way → change tab
-                      },
-                    ),
-
-                    // View Announcements
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      child: dashboardCard(
-                        icon: CupertinoIcons.news_solid,
-                        label: 'Announcements',
-                        color: CupertinoColors.systemBlue,
-                      ),
-                      onPressed: () {
-                        tabController.index = 1; // Correct way → change tab
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Reusable Dashboard Card
-  Widget dashboardCard({required IconData icon, required String label, required Color color}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.5),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: CupertinoColors.white, size: 50),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: const TextStyle(
-                color: CupertinoColors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/corkboard.png',
+              fit: BoxFit.cover,
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget buildAnnouncementsTab() {
-    final announcements = SharedData().announcements;
-
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Announcements'),
-      ),
-      child: SafeArea(
-        child: announcements.isEmpty
-            ? Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(CupertinoIcons.news, size: 80, color: CupertinoColors.systemGrey),
-              SizedBox(height: 16),
-              Text(
-                'No announcements yet.',
-                style: TextStyle(fontSize: 18, color: CupertinoColors.systemGrey),
-              ),
-            ],
           ),
-        )
-            : ListView.separated(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: announcements.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final announcement = announcements[index];
-
-            return Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: CupertinoColors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 24),
+                    const Expanded(
+                      child: Text(
+                        'Parent Dashboard',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: CupertinoColors.white,
+                          shadows: [
+                            Shadow(
+                              color: CupertinoColors.black,
+                              offset: Offset(0, 1),
+                              blurRadius: 2,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      child: const Icon(
+                        CupertinoIcons.power,
+                        color: CupertinoColors.white,
+                        size: 24,
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
               ),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 70, left: 16, right: 16),
+              child: Column(
                 children: [
-                  const Icon(
-                    CupertinoIcons.news_solid,
-                    size: 32,
-                    color: CupertinoColors.systemBlue,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: CupertinoColors.systemGrey2.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                    child: Row(
                       children: [
-                        Text(
-                          announcement.title,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        Icon(
+                          childSeat.isPresent
+                              ? CupertinoIcons.check_mark_circled_solid
+                              : CupertinoIcons.clear_circled_solid,
+                          color: childSeat.isPresent
+                              ? CupertinoColors.activeGreen
+                              : CupertinoColors.systemRed,
+                          size: 36,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            '${childSeat.studentName} is currently ${childSeat.isPresent ? "Present" : "Absent / On Break"}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: CupertinoColors.black,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          announcement.date,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: CupertinoColors.systemGrey,
-                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 20,
+                      crossAxisSpacing: 20,
+                      children: [
+                        dashboardButton(
+                          icon: CupertinoIcons.time,
+                          label: 'Attendance History',
+                          color: const Color(0xFFD1E8FF),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) =>
+                                    ParentChildAttendanceHistoryScreen(
+                                      childName: childSeat.studentName,
+                                    ),
+                              ),
+                            );
+                          },
+                        ),
+                        dashboardButton(
+                          icon: CupertinoIcons.person_3_fill,
+                          label: 'View Seat Map',
+                          color: const Color(0xFFCAF7E3),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              CupertinoPageRoute(
+                                builder: (context) => SeatMapScreen(
+                                  seats: SharedSeatData().seats,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        dashboardButton(
+                          icon: CupertinoIcons.chart_bar_alt_fill,
+                          label: 'Grades',
+                          color: const Color(0xFFFFE8D6),
+                          onPressed: () {
+                            tabController.index = 2;
+                          },
+                        ),
+                        dashboardButton(
+                          icon: CupertinoIcons.news_solid,
+                          label: 'Announcements',
+                          color: const Color(0xFFE4C1F9),
+                          onPressed: () {
+                            tabController.index = 1;
+                          },
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-            );
-          },
-        ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Announcement and Grades tab code to match back button style
+  Widget buildAnnouncementsTab() {
+    return CupertinoPageScaffold(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/corkboard.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: const Icon(
+                          CupertinoIcons.chevron_left,
+                          color: CupertinoColors.white,
+                        ),
+                        onPressed: () => tabController.index = 0,
+                      ),
+                      const Expanded(
+                        child: Text(
+                          'Announcements',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: CupertinoColors.white,
+                            shadows: [
+                              Shadow(
+                                color: CupertinoColors.black,
+                                offset: Offset(0, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 24), // spacer to balance back button
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 290),
+                const Expanded(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      'No announcements yet.',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: CupertinoColors.white,
+                        shadows: [
+                          Shadow(
+                            color: CupertinoColors.black,
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
   Widget buildGradesTab() {
-    final grades = SharedData().grades;
-
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Grades'),
-      ),
-      child: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: grades.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
-          itemBuilder: (context, index) {
-            final entry = grades.entries.elementAt(index);
-            final subject = entry.key;
-            final grade = entry.value;
-
-            Color gradeColor;
-            if (grade >= 90) {
-              gradeColor = CupertinoColors.activeGreen;
-            } else if (grade >= 80) {
-              gradeColor = CupertinoColors.systemOrange;
-            } else {
-              gradeColor = CupertinoColors.systemRed;
-            }
-
-            return Container(
-              decoration: BoxDecoration(
-                color: CupertinoColors.systemGrey6,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: CupertinoColors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    subject,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Row(
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/corkboard.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
                     children: [
-                      Icon(
-                        CupertinoIcons.circle_filled,
-                        color: gradeColor,
-                        size: 16,
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        child: const Icon(
+                          CupertinoIcons.chevron_left,
+                          color: CupertinoColors.white,
+                        ),
+                        onPressed: () => tabController.index = 0,
                       ),
-                      const SizedBox(width: 6),
-                      Text(
-                        '$grade',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: gradeColor,
+                      const Expanded(
+                        child: Text(
+                          'Grades',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: CupertinoColors.white,
+                            shadows: [
+                              Shadow(
+                                color: CupertinoColors.black,
+                                offset: Offset(0, 1),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 24),
                     ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                ),
+                const SizedBox(height:290),
+                const Expanded(
+                    child: Text(
+                      textAlign: TextAlign.center,
+                      'Grades will be shown here.',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: CupertinoColors.white,
+                        shadows: [
+                          Shadow(
+                            color: CupertinoColors.black,
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
 
+
   Widget buildSettingsTab() {
-    return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Settings'),
-      ),
-      child: SafeArea(
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return CupertinoPageScaffold(
+          child: Stack(
+            children: [
+              // Corkboard background
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/corkboard.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              // Custom navigation bar
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          child: const Icon(
+                            CupertinoIcons.chevron_left,
+                            color: CupertinoColors.white,
+                          ),
+                          onPressed: () => tabController.index = 0,
+                        ),
+                        const Expanded(
+                          child: Text(
+                            'Settings',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: CupertinoColors.white,
+                              shadows: [
+                                Shadow(
+                                  color: CupertinoColors.black,
+                                  offset: Offset(0, 1),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 24), // Spacer to balance back button
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Foreground content
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 70, left: 16, right: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Enable Notifications',
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            CupertinoSwitch(
+                              value: _notificationsEnabled,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  _notificationsEnabled = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+
+
+  Widget dashboardButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onPressed,
+      child: Container(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: CupertinoColors.systemGrey.withOpacity(0.3),
+              blurRadius: 6,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
         child: Center(
-          child: CupertinoButton.filled(
-            child: const Text('Logout'),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: CupertinoColors.black, size: 50),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: CupertinoColors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
         ),
       ),
